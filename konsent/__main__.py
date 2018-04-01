@@ -6,7 +6,7 @@ import datetime
 from flask import Flask, g, render_template, flash, redirect, url_for, session, logging, request
 from wtforms.csrf.core import CSRF
 from wtforms.csrf.session import SessionCSRF
-from wtforms import Form, StringField, TextAreaField, PasswordField, SelectField, HiddenField, SubmitField, BooleanField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, SelectField, HiddenField, SubmitField, BooleanField, validators, ValidationError
 from functools import wraps
 import datetime
 from models import User, Union, Post, Vote, Comment
@@ -588,6 +588,11 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm password')
     users_union = SelectField('Union', choices=[('kristensamfundet', 'Kristensamfundet')])
     union_password = PasswordField('Password for union', [validators.DataRequired()])
+
+    def validate_username(form, field):
+        user = User.query.filter(User.username == field.data).first()
+        if user is not None:
+            raise ValidationError('Username is already taken')
 
 
 class ArticleForm(Form):
